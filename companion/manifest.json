@@ -1,0 +1,33 @@
+{
+  "$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
+  "id": "avgear-matrix",
+  "name": "avgear-Matrix",
+  "shortname": "Matrix",
+  "description": "Companion module for avgear Matrix switchers",
+  "version": "0.0.0",
+  "license": "MIT",
+  "repository": "git+https://github.com/bitfocus/companion-module-avgear-matrix.git",
+  "bugs": "https://github.com/bitfocus/companion-module-avgear-matrix/issues",
+  "maintainers": [
+    {
+      "name": "Damien Peden",
+      "email": "webmaster@dpdesignz.co.nz"
+    }
+  ],
+  "runtime": {
+    "type": "node22",
+    "api": "nodejs-ipc",
+    "apiVersion": "0.0.0",
+    "entrypoint": "../dist/main.js"
+  },
+  "legacyIds": [],
+  "manufacturer": "AVGear",
+  "products": [
+    "TMX88PRO AV"
+  ],
+  "keywords": [
+    "avgear",
+    "matrix",
+    "switcher"
+  ]
+}
