@@ -4,7 +4,7 @@ This module allows you to control your avgear matrix. Currently, this module onl
 
 ## Module Setup
 
-Enter the IP address for the device in the module connection settings. If you have set up the device to run on a non-standard port (ie. not port 4001), that port can be included in the IP address as a :. All that's left is to set your polling interval. By default the module will poll the device once every second - a value of 0 will disable polling, but as connections to the device are not kept open, that will mean that the module will assume the device is online until the next action is performed. If you are using companion to also monitor device state, it is recommened that if you are concerned about companion or network load to just have a higher polling interval so that state will at least be reasonably accurate.
+Enter the IP address for the device in the module connection settings. If you have set up the device to run on a non-standard port (ie. not port 4001), that port can also be set in the connection settings. All that's left is to set your polling interval. By default the module will poll the device once every 10 seconds - a value of 0 will disable polling, but as connections to the device are not kept open, that will mean that the module will assume the device is online until the next action is performed. If you are using companion to also monitor device state, it is recommened that if you are concerned about companion or network load to just have a higher polling interval so that state will at least be reasonably accurate.
 
 ## Actions
 

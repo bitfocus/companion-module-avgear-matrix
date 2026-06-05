@@ -1,19 +1,24 @@
 import {
 	InstanceBase,
-	runEntrypoint,
 	InstanceStatus,
 	TCPHelper,
+	type InstanceTypes,
 	type SomeCompanionConfigField,
 } from '@companion-module/base'
 import { GetConfigFields, type ModuleConfig } from './config.js'
 import { UpdateVariableDefinitions } from './variables.js'
-import { UpgradeScripts } from './upgrades.js'
+export { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 import { UpdatePresets } from './presets.js'
 import http from 'node:http'
 
-export class ModuleInstance extends InstanceBase<ModuleConfig> {
+interface MatrixInstanceTypes extends InstanceTypes {
+	config: ModuleConfig
+	secrets: undefined
+}
+
+export default class ModuleInstance extends InstanceBase<MatrixInstanceTypes> {
 	config!: ModuleConfig
 
 	private socket?: TCPHelper
@@ -26,8 +31,8 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	private pendingStatusLineIndex = 0
 
 	public routes: Record<number, number> = {}
-	public inputLabels: Record<number, string> = {}
-	public outputLabels: Record<number, string> = {}
+	public inputLabels: Record<string, string> = {}
+	public outputLabels: Record<string, string> = {}
 
 	public isOn: boolean | undefined = undefined
 	public outputPowerStates: Record<number, boolean | undefined> = {}
@@ -42,8 +47,8 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	async init(config: ModuleConfig): Promise<void> {
 		this.config = this.applyConfigDefaults(config)
 
-		this.inputLabels = { ...(this.config.cachedInputLabels ?? {}) }
-		this.outputLabels = { ...(this.config.cachedOutputLabels ?? {}) }
+		this.inputLabels = this.normalizeCachedLabels(this.config.cachedInputLabels)
+		this.outputLabels = this.normalizeCachedLabels(this.config.cachedOutputLabels)
 
 		this.updateActions()
 		this.updateFeedbacks()
@@ -77,8 +82,8 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	async configUpdated(config: ModuleConfig): Promise<void> {
 		this.config = this.applyConfigDefaults(config)
 
-		this.inputLabels = { ...(this.config.cachedInputLabels ?? {}) }
-		this.outputLabels = { ...(this.config.cachedOutputLabels ?? {}) }
+		this.inputLabels = this.normalizeCachedLabels(this.config.cachedInputLabels)
+		this.outputLabels = this.normalizeCachedLabels(this.config.cachedOutputLabels)
 
 		this.stopPolling()
 		this.stopLabelPolling()
@@ -125,9 +130,21 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			port: typeof config.port === 'number' && config.port > 0 ? config.port : 4001,
 			pollIntervalMs:
 				typeof config.pollIntervalMs === 'number' && config.pollIntervalMs >= 0 ? config.pollIntervalMs : 10000,
-			cachedInputLabels: config.cachedInputLabels ?? {},
-			cachedOutputLabels: config.cachedOutputLabels ?? {},
+			cachedInputLabels: this.normalizeCachedLabels(config.cachedInputLabels),
+			cachedOutputLabels: this.normalizeCachedLabels(config.cachedOutputLabels),
 		}
+	}
+
+	private normalizeCachedLabels(labels: ModuleConfig['cachedInputLabels']): Record<string, string> {
+		const result: Record<string, string> = {}
+
+		for (const [key, value] of Object.entries(labels ?? {})) {
+			if (typeof value === 'string') {
+				result[key] = value
+			}
+		}
+
+		return result
 	}
 
 	private initConnection(): void {
@@ -247,6 +264,10 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		}
 	}
 
+	private checkMatrixFeedbacks(): void {
+		this.checkFeedbacks('route_active', 'unit_power_on', 'output_power_on')
+	}
+
 	private parseLine(line: string): void {
 		if (/^Please Input Your Command\s*:/i.test(line)) {
 			return
@@ -333,7 +354,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 		if (changed) {
 			this.updateAllVariableValues()
-			void this.checkFeedbacks()
+			this.checkMatrixFeedbacks()
 		}
 	}
 
@@ -466,7 +487,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	public setUnitPowerState(state: boolean): void {
 		this.isOn = state
 		this.updateAllVariableValues()
-		this.checkFeedbacks()
+		this.checkMatrixFeedbacks()
 	}
 
 	public toggleUnitPowerState(): void {
@@ -483,9 +504,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		if (output >= 1 && output <= 8) {
 			this.outputPowerStates[output] = state
 			this.updateAllVariableValues()
-			this.checkFeedbacks()
+			this.checkMatrixFeedbacks()
 		}
 	}
 }
-
-runEntrypoint(ModuleInstance, UpgradeScripts)

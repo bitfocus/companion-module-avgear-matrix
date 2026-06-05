@@ -1,24 +1,10 @@
 import type { CompanionActionDefinitions } from '@companion-module/base'
-import type { ModuleInstance } from './main.js'
+import { buildInputChoices, buildOutputChoices } from './choices.js'
+import type ModuleInstance from './main.js'
 
 export function UpdateActions(self: ModuleInstance): void {
-	const inputChoices = Array.from({ length: 8 }, (_, i) => {
-		const input = i + 1
-		const label = self.getInputLabel(input)
-		return {
-			id: input,
-			label: label && label !== `Input ${input}` ? `Input ${input} - ${label}` : `Input ${input}`,
-		}
-	})
-
-	const outputChoices = Array.from({ length: 8 }, (_, i) => {
-		const output = i + 1
-		const label = self.getOutputLabel(output)
-		return {
-			id: output,
-			label: label && label !== `Output ${output}` ? `Output ${output} - ${label}` : `Output ${output}`,
-		}
-	})
+	const inputChoices = buildInputChoices(self)
+	const outputChoices = buildOutputChoices(self)
 
 	const actions: CompanionActionDefinitions = {
 		route: {

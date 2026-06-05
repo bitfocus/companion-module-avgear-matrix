@@ -1,11 +1,11 @@
-import { Regex, type SomeCompanionConfigField } from '@companion-module/base'
+import { Regex, type JsonObject, type SomeCompanionConfigField } from '@companion-module/base'
 
-export interface ModuleConfig {
+export type ModuleConfig = JsonObject & {
 	host: string
 	port: number
 	pollIntervalMs: number
-	cachedInputLabels?: Record<number, string>
-	cachedOutputLabels?: Record<number, string>
+	cachedInputLabels?: JsonObject
+	cachedOutputLabels?: JsonObject
 }
 
 export function GetConfigFields(): SomeCompanionConfigField[] {
