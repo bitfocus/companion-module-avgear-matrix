@@ -119,3 +119,7 @@ This feedback shows whether the unit is currently powered on.
 ### 1.0.0
 
 Initial release
+
+### 2.0.0
+
+Added support for API 2.0; Moved `inputChoices` and `outputChoices` to be reusable; Added `preset_recall` and `preset_save` presets; Corrected help documentation for config options.
